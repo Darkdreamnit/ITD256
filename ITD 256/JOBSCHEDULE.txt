@@ -1,0 +1,48 @@
+SELECT dbms_flashback.get_system_change_number as current_scn 
+FROM DUAL;
+
+SELECT current_scn
+FROM V$DATABASE;
+````````````````````````````````
+
+DBMS_SCHEDULER.DROP_JOB(JOB_NAME => 'savedata');
+
+```````````````````````````````````````````
+
+BEGIN
+DBMS_SCHEDULER.CREATE_JOB (
+   job_name             => 'Job1',
+   job_type             => 'PLSQL_BLOCK',
+   job_action           => 'insert into Midterm values((select current_scn from v$database), sysdate',
+   start_date           => 'sysdate',
+   repeat_interval      => 'FREQ=minutely; interval=10', 
+   enabled              =>  TRUE,
+auto_drop=> false,
+   comments             => 'Answer to number1 midterm');
+END;
+/
+
+
+
+
+dbms_scheduler.create_job(
+job_name=>'savedate',
+job_type=>'plsql_block',
+job_action=>'insert into times values(sysdate);',
+start_date=>sysdate,
+repeat_interval=>'freq=minutely;interval=1',
+enabled=>true,
+auto_drop=>false);
+end;
+/
+
+
+select distinct
+   to_char(start_time,'DD-MON-YY hh24:mi') c1,
+   parameter c2,
+   oper_type c3
+from
+   v$memory_resize_ops
+order by
+   c1
+;

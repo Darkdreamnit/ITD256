@@ -1,0 +1,7 @@
+set encryption on for all tablespaces algorithm 'AES128';
+run {
+allocate channel enc_backup_disk1 type disk format '/u01/backup/orcl/%U';
+backup as BACKUPSET tag 'TRANSPARENT' database;
+backup as BACKUPSET tag 'TRANSPARENT' archivelog all not backed up;
+release channel enc_backup_disk1;
+}

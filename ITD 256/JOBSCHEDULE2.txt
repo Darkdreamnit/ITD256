@@ -1,0 +1,81 @@
+CREATE OR REPLACE PROCEDURE insertSCN AS
+  vcurscn NUMBER;
+BEGIN
+ --vcurscn := sys.dbms_flashback.get_system_change_number;
+  INSERT INTO Midterm
+   VALUES ( vcurscn, sysdate);
+  commit;
+END insertSCN;
+/
+
+*************craete program
+********************* craete program for the job
+BEGIN
+DBMS_SCHEDULER.CREATE_PROGRAM (
+  program_name      => 'PROG_INSERTSCN',
+program_action     => 'insertSCN',
+program_type      => 'STORED_PROCEDURE');
+END;
+/
+
+***********enable the program
+
+exec dbms_scheduler.enable('PROG_INSERTSCN')
+
+*************create schedule for job to run
+
+BEGIN
+DBMS_SCHEDULER.CREATE_SCHEDULE (
+ schedule_name   => 'TenMinSchedule',
+ start_date    => SYSTIMESTAMP,
+ repeat_interval  => 'FREQ=MINUTELY; INTERVAL=10',
+ comments     => 'Every 10 minutes');
+END;
+
+
+vcurscn := sys.dbms_flashback.get_system_change_number
+/
+*************** create job
+
+BEGIN
+DBMS_SCHEDULER.CREATE_JOB (
+  job_name     => 'INSERTSCNJOB3',
+  program_name   => 'PROG_INSERTSCN',
+  schedule_name   => 'TenMinSchedule');
+END;
+/
+
+********Enable job
+exec dbms_scheduler.enable('INSERTSCNJOB3')
+
+
+
+FLASHBACK TABLE HR.JOB_HISTORY
+  TO before drop;
+
+
+
+Select * from EmployeesX01 as of timestamp sysdate - 7200
+where employee_id=30;
+
+
+SELECT * FROM USER_ERRORS WHERE NAME='INSERTSCN' ORDER BY SEQUENCE, LINE;
+
+SELECT versions_xid XID, versions_startscn START_SCN,
+  versions_endscn END_SCN, versions_operation OPERATION
+FROM employeesX01
+VERSIONS BETWEEN SCN MINVALUE = 1 AND MAXVALUE = 3
+WHERE department_id = 30;
+
+\
+
+select job_name, job_action, schedule_owner, start_date, repeat_interval from user_scheduler_jobs where job_name ='INSERTSCNJOB3';
+
+
+
+
+
+
+
+
+

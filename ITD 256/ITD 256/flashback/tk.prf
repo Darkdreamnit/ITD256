@@ -1,0 +1,921 @@
+
+TKPROF: Release 11.1.0.6.0 - Production on Tue Jun 2 10:20:24 2009
+
+Copyright (c) 1982, 2007, Oracle.  All rights reserved.
+
+Trace file: /home/ora11gr1/app/ora11gr1/diag/rdbms/ora11gr1/ora11gr1/trace/ora11gr1_ora_9506.trc
+Sort options: default
+
+********************************************************************************
+count    = number of times OCI procedure was executed
+cpu      = cpu time in seconds executing 
+elapsed  = elapsed time in seconds executing
+disk     = number of physical reads of buffers from disk
+query    = number of buffers gotten for consistent read
+current  = number of buffers gotten in current mode (usually for update)
+rows     = number of rows processed by the fetch or execute call
+********************************************************************************
+
+SQL ID : 9babjv8yq8ru3
+BEGIN DBMS_OUTPUT.GET_LINES(:LINES, :NUMLINES); END;
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        3      0.00       0.00          0          0          0           0
+Execute      3      0.00       0.09          0          0          0           3
+Fetch        0      0.00       0.00          0          0          0           0
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        6      0.00       0.09          0          0          0           3
+
+Misses in library cache during parse: 0
+Optimizer mode: ALL_ROWS
+Parsing user id: 81  
+
+Elapsed times include waiting on following events:
+  Event waited on                             Times   Max. Wait  Total Waited
+  ----------------------------------------   Waited  ----------  ------------
+  SQL*Net message to client                       3        0.00          0.00
+  SQL*Net message from client                     3       20.45         20.47
+********************************************************************************
+
+SQL ID : g9wtxa8pak7c9
+flashback table emp to scn          4652838
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.00       0.00          0          0          0           0
+Execute      1      0.00       0.01          4         25          4           0
+Fetch        0      0.00       0.00          0          0          0           0
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        2      0.00       0.01          4         25          4           0
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 81  
+
+Elapsed times include waiting on following events:
+  Event waited on                             Times   Max. Wait  Total Waited
+  ----------------------------------------   Waited  ----------  ------------
+  SQL*Net message to client                       2        0.00          0.00
+  SQL*Net message from client                     2        0.00          0.00
+  log file sync                                   2        0.00          0.00
+********************************************************************************
+
+SQL ID : 2fhhcsnuu9520
+truncate table SYS_TEMP_FBT
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.00       0.00          0          0          0           0
+Execute      1      0.00       0.02          0          0          2           0
+Fetch        0      0.00       0.00          0          0          0           0
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        2      0.00       0.02          0          0          2           0
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 81     (recursive depth: 1)
+********************************************************************************
+
+BEGIN
+  BEGIN
+    IF (sys.is_vpd_enabled(sys.dictionary_obj_owner, sys.dictionary_obj_name, xdb.DBMS_XDBZ.IS_ENABLED_CONTENTS)) THEN
+      xdb.XDB_PITRIG_PKG.pitrig_truncate(sys.dictionary_obj_owner, sys.dictionary_obj_name);
+    ELSIF (sys.is_vpd_enabled(sys.dictionary_obj_owner, sys.dictionary_obj_name, xdb.DBMS_XDBZ.IS_ENABLED_RESMETADATA)) THEN
+      xdb.XDB_PITRIG_PKG.pitrig_dropmetadata(sys.dictionary_obj_owner, sys.dictionary_obj_name);
+    END IF;
+  EXCEPTION
+    WHEN OTHERS THEN
+     null;
+  END;
+END;
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.00       0.00          0          0          0           0
+Execute      1      0.00       0.00          0          0          0           1
+Fetch        0      0.00       0.00          0          0          0           0
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        2      0.00       0.00          0          0          0           1
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 41     (recursive depth: 2)
+********************************************************************************
+
+declare
+ TYPE attrs_cur IS REF CURSOR;
+ m_cur       attrs_cur;
+ m_event varchar2(512);
+ m_user  varchar2(512);
+ m_owner varchar2(512);
+ m_user1 varchar2(512);
+ m_type  varchar2(512);
+ m_stmt  varchar2(512);
+ m_name  varchar2(5120);
+ m_column varchar2(5120);
+ m_cnt   NUMBER;
+ m_stmt1 varchar2(512);
+ m_var   varchar2(512);
+ m_o_stmt VARCHAR2(5120);
+PRAGMA AUTONOMOUS_TRANSACTION;
+begin
+ m_stmt:='select ora_dict_obj_type from dual';
+ execute immediate m_stmt into m_type;
+ if(not (m_type='TABLE' or m_type='TRIGGER' or m_type='USER'))
+ then
+   return;
+ end if;
+ m_stmt:='select ora_sysevent from dual';
+ execute immediate m_stmt into m_event;
+ m_stmt:='select SYS_CONTEXT(''USERENV'',''SESSION_USER'') from dual';
+ execute immediate m_stmt into m_user;
+ m_stmt:='select SYS_CONTEXT(''USERENV'',''CURRENT_USER'') from dual';
+ execute immediate m_stmt into m_user1;
+ m_stmt:='select ora_dict_obj_owner from dual';
+ execute immediate m_stmt into m_owner;
+ m_stmt:='select ora_dict_obj_name from dual';
+ execute immediate m_stmt into m_name;
+ m_stmt:='select sdo_geor_def.getSqlText from dual';
+ execute immediate m_stmt into m_o_stmt;
+  if (m_owner!='MDSYS' and m_owner!='SYS' and m_type='TABLE' and m_event='ALTER')
+  then
+    m_stmt:='select column_name from dba_tab_columns where owner=:1 and table_name=:2';
+    open m_cur for m_stmt using m_owner,m_name;
+    loop
+      fetch m_cur into m_column;
+      exit when m_cur%NOTFOUND;
+      m_stmt:='select sdo_geor_def.isDropColumn(:1) from dual';
+      execute immediate m_stmt into m_stmt1 using DBMS_ASSERT.SIMPLE_SQL_NAME(m_column);
+      if (trim(m_stmt1)='TRUE')
+      then
+        m_stmt:='begin sdo_geor_def.doAlterDropColumn(:1,:2,:3); end;';
+        execute immediate m_stmt using DBMS_ASSERT.SCHEMA_NAME(m_owner),DBMS_ASSERT.SIMPLE_SQL_NAME(m_name),DBMS_ASSERT.SIMPLE_SQL_NAME(m_column);
+      end if;
+    end loop;
+  end if;
+ if (m_event='DROP' and m_type='USER')
+ then
+   m_stmt:='insert into sdo_geor_ddl__table$$ values (1)';
+   EXECUTE IMMEDIATE m_stmt;
+   commit;
+ end if;
+ if (m_event='DROP' and m_type='TABLE')
+ then
+   m_stmt:='select count(*) from sdo_geor_sysdata_table where sdo_owner=:1 and RDT_TABLE_NAME=:2';
+   EXECUTE IMMEDIATE m_stmt into m_cnt using m_owner,m_name;
+   if(m_cnt!=0)
+   then
+     m_stmt:='select count(*) from sdo_geor_ddl__table$$';
+     EXECUTE IMMEDIATE m_stmt into m_cnt;
+     if((m_cnt=0)and (m_user!='SYS' and m_user!='SYSTEM' and m_user!='MDSYS'and m_owner!='MDSYS' and m_owner!='SYS'))
+     then
+        m_stmt:='call mderr.raise_md_error(''MD'', ''SDO'', -13391, ''The referenced raster data table(RDT) cannot be dropped.'')';
+        execute immediate m_stmt;
+     end if;
+   end if;
+   m_stmt:='insert into sdo_geor_ddl__table$$ values (2)';
+   EXECUTE IMMEDIATE m_stmt;
+   commit;
+ end if;
+ if(m_user='SYS' or m_user='SYSTEM' or m_user='MDSYS'
+   or m_owner='MDSYS' or m_owner='SYS')
+ then
+   return;
+ end if;
+ if (m_event='RENAME' and m_type='TABLE')
+ then
+   m_stmt:='select count(*) from sdo_geor_sysdata_table where sdo_owner=:1 and RDT_TABLE_NAME=:2';
+   EXECUTE IMMEDIATE m_stmt into m_cnt using m_owner,m_name;
+   if(m_cnt!=0)
+   then
+     m_stmt:='select count(*) from sdo_geor_ddl__table$$';
+     EXECUTE IMMEDIATE m_stmt into m_cnt;
+     if(m_cnt=0)
+     then
+        m_stmt:='call mderr.raise_md_error(''MD'', ''SDO'', -13391, ''The referenced raster data table(RDT) cannot be renamed directly.'')';
+        execute immediate m_stmt;
+     end if;
+   end if;
+ end if;
+ if (m_type='TRIGGER' and m_event='DROP')
+ then
+   m_stmt:='select REGEXP_SUBSTR(:1,''GRDMLTR_.+'',1,1,''i'') from dual';
+   EXECUTE IMMEDIATE m_stmt into m_var using m_name;
+   if(m_var is null)
+   then
+     return;
+   end if;
+   m_stmt:='select count(*) from sdo_geor_ddl__table$$';
+   EXECUTE IMMEDIATE m_stmt into m_cnt;
+   if(m_cnt=0)
+   then
+     m_stmt:='call mderr.raise_md_error(''MD'', ''SDO'', -13391, ''GeoRaster DML triggers cannot be dropped.'')';
+     execute immediate m_stmt;
+   end if;
+ end if;
+ if (m_type='TRIGGER' and m_event='ALTER')
+ then
+   m_o_stmt:=upper(trim(m_o_stmt));
+   if(instr(m_o_stmt,' COMPILE ')>0 or instr(m_o_stmt,' ENABLE ')>0
+     or substr(m_o_stmt,length(m_o_stmt)-8,8)=' COMPILE' or substr(m_o_stmt,length(m_o_stmt)-7,7)=' ENABLE' )
+   then
+     return;
+   end if;
+   m_stmt:='select REGEXP_SUBSTR(:1,''GRDMLTR_.+'',1,1,''i'') from dual';
+   EXECUTE IMMEDIATE m_stmt into m_var using m_name;
+   if(m_var is null)
+   then
+     return;
+   end if;
+   m_stmt:='select count(*) from sdo_geor_ddl__table$$';
+   EXECUTE IMMEDIATE m_stmt into m_cnt;
+   if(m_cnt=0)
+   then
+     m_stmt:='call mderr.raise_md_error(''MD'', ''SDO'', -13391, ''GeoRaster DML triggers cannot be altered.'')';
+     execute immediate m_stmt;
+   end if;
+ end if;
+ if (m_type='TRIGGER' and m_event='CREATE')
+ then
+   m_stmt:='select REGEXP_SUBSTR(:1,''GRDMLTR_.+'',1,1,''i'') from dual';
+   EXECUTE IMMEDIATE m_stmt into m_var using m_name;
+   if(m_var is null)
+   then
+     return;
+   end if;
+   m_stmt:='select count(*) from sdo_geor_ddl__table$$';
+   EXECUTE IMMEDIATE m_stmt into m_cnt;
+   if(m_cnt=0)
+   then
+     m_stmt:='call mderr.raise_md_error(''MD'', ''SDO'', -13391, ''GeoRaster reserved names cannot be used to create regular triggers.'')';
+     execute immediate m_stmt;
+   end if;
+ end if;
+ Exception
+   when others then
+     if(sqlcode=-13391)
+     then
+       m_stmt:=sqlerrm;
+       m_stmt:=substr(m_stmt,11);
+       m_stmt:='call mderr.raise_md_error(''MD'', ''SDO'', -13391,'''||m_stmt||''')';
+       execute immediate m_stmt;
+     end if;
+end;
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.05       0.05          0          0          0           0
+Execute      1      0.00       0.00          0          0          0           1
+Fetch        0      0.00       0.00          0          0          0           0
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        2      0.05       0.06          0          0          0           1
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 2)
+********************************************************************************
+
+SQL ID : 4xpy6uxc912h1
+select ora_dict_obj_type 
+from
+ dual
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        2      0.00       0.00          0          0          0           0
+Execute      2      0.00       0.00          0          0          0           0
+Fetch        2      0.00       0.00          0          0          0           2
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        6      0.00       0.00          0          0          0           2
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 3)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  FAST DUAL  (cr=0 pr=0 pw=0 time=0 us cost=2 size=0 card=1)
+
+********************************************************************************
+
+SQL ID : 2tqbkfv5xnx8v
+select ora_sysevent 
+from
+ dual
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        2      0.00       0.00          0          0          0           0
+Execute      2      0.00       0.00          0          0          0           0
+Fetch        2      0.00       0.00          0          0          0           2
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        6      0.00       0.00          0          0          0           2
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 3)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  FAST DUAL  (cr=0 pr=0 pw=0 time=0 us cost=2 size=0 card=1)
+
+********************************************************************************
+
+SQL ID : d7y4tdacc7f3j
+select SYS_CONTEXT('USERENV','SESSION_USER') 
+from
+ dual
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        2      0.00       0.00          0          0          0           0
+Execute      2      0.00       0.00          0          0          0           0
+Fetch        2      0.00       0.00          0          0          0           2
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        6      0.00       0.00          0          0          0           2
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 3)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  FAST DUAL  (cr=0 pr=0 pw=0 time=0 us cost=2 size=0 card=1)
+
+********************************************************************************
+
+SQL ID : 721d7993vjur9
+select SYS_CONTEXT('USERENV','CURRENT_USER') 
+from
+ dual
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.00       0.00          0          0          0           0
+Execute      1      0.00       0.00          0          0          0           0
+Fetch        1      0.00       0.00          0          0          0           1
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        3      0.00       0.00          0          0          0           1
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 3)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  FAST DUAL  (cr=0 pr=0 pw=0 time=0 us cost=2 size=0 card=1)
+
+********************************************************************************
+
+SQL ID : czn2fqzmg1xgq
+select ora_dict_obj_owner 
+from
+ dual
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        2      0.00       0.00          0          0          0           0
+Execute      2      0.00       0.00          0          0          0           0
+Fetch        2      0.00       0.00          0          0          0           2
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        6      0.00       0.00          0          0          0           2
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 3)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  FAST DUAL  (cr=0 pr=0 pw=0 time=0 us cost=2 size=0 card=1)
+
+********************************************************************************
+
+SQL ID : fsbyrj9f4z0v8
+select ora_dict_obj_name 
+from
+ dual
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        2      0.00       0.00          0          0          0           0
+Execute      2      0.00       0.00          0          0          0           0
+Fetch        2      0.00       0.00          0          0          0           2
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        6      0.00       0.00          0          0          0           2
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 3)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  FAST DUAL  (cr=0 pr=0 pw=0 time=0 us cost=2 size=0 card=1)
+
+********************************************************************************
+
+SQL ID : bcg7084jc4um6
+select sdo_geor_def.getSqlText 
+from
+ dual
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.00       0.00          0          0          0           0
+Execute      1      0.00       0.00          0          0          0           0
+Fetch        1      0.00       0.00          0          0          0           1
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        3      0.00       0.00          0          0          0           1
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 3)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  FAST DUAL  (cr=0 pr=0 pw=0 time=0 us cost=2 size=0 card=1)
+
+********************************************************************************
+
+declare
+ TYPE attrs_cur IS REF CURSOR;
+ m_cur       attrs_cur;
+ m_event   varchar2(512);
+ m_user    varchar2(512);
+ m_owner   varchar2(512);
+ m_user1   varchar2(512);
+ m_type    varchar2(512);
+ m_name    varchar2(5120);
+ m_column  varchar2(5120);
+ m_cnt     NUMBER;
+ m_stmt    varchar2(512);
+ m_ret     varchar2(3000);
+ m_ret1     varchar2(512);
+ m_o_stmt VARCHAR2(5120);
+begin
+ m_stmt:='select ora_dict_obj_type from dual';
+ execute immediate m_stmt into m_type;
+ if(not (m_type='TABLE' or m_type='TRIGGER' or m_type='USER'))
+ then
+   return;
+ end if;
+ m_stmt:='select ora_sysevent from dual';
+ execute immediate m_stmt into m_event;
+ m_stmt:='select SYS_CONTEXT(''USERENV'',''SESSION_USER'') from dual';
+ execute immediate m_stmt into m_user;
+ m_stmt:='select ora_login_user  from dual';
+ execute immediate m_stmt into m_user1;
+ m_stmt:='select ora_dict_obj_owner from dual';
+ execute immediate m_stmt into m_owner;
+ m_stmt:='select ora_dict_obj_name from dual';
+ execute immediate m_stmt into m_name;
+ if (m_owner!='MDSYS' and m_owner!='SYS' and m_type='TABLE' and m_event='CREATE')
+ then
+   m_stmt:='select sdo_geor_def.listAllGeoRasterFieldsStr(:1,:2) from dual';
+   execute immediate m_stmt  into m_ret  using DBMS_ASSERT.SCHEMA_NAME(m_owner),DBMS_ASSERT.SIMPLE_SQL_NAME(m_name);
+   m_ret:=trim(m_ret);
+   while (length(m_ret)!=0) loop
+     if (instr(m_ret,' $$__## ')!=0)
+     then
+       m_ret1:=trim(substr(m_ret,1,instr(m_ret,' $$__## ')-1));
+       m_ret:=trim(substr(m_ret,instr(m_ret,' $$__## ')+8));
+     else
+       m_ret1:=trim(m_ret);
+       m_ret:='';
+     end if;
+     m_stmt:='begin SDO_GEOR_UTL.createDMLTrigger(:1,:2); end;';
+    execute immediate m_stmt using m_owner||'.'||m_name,DBMS_ASSERT.QUALIFIED_SQL_NAME(m_ret1);
+   end loop;
+   return;
+ end if;
+  if (m_name!='MDSYS' and m_type='USER' and m_event='DROP')
+  then
+     m_stmt:='call sdo_geor_def.doDropUserAndTable()';
+     execute immediate m_stmt;
+  end if;
+  if (m_owner!='MDSYS' and m_owner!='SYS' and m_type='TABLE' and m_event='DROP')
+  then
+     m_stmt:='call sdo_geor_def.doDropUserAndTable()';
+     execute immediate m_stmt;
+  end if;
+  if (m_owner!='MDSYS' and m_owner!='SYS' and m_type='TABLE' and m_event='TRUNCATE')
+  then
+     m_stmt:='call sdo_geor_def.doTruncateTable()';
+     execute immediate m_stmt;
+  end if;
+  if (m_owner!='MDSYS' and m_owner!='SYS' and m_type='TABLE' and m_event='ALTER')
+  then
+     m_stmt:='call sdo_geor_def.doAlterRenameTable()';
+     execute immediate m_stmt;
+  end if;
+  if (m_owner!='MDSYS' and m_owner!='SYS' and m_type='TABLE' and m_event='RENAME')
+  then
+     m_stmt:='call sdo_geor_def.doRenameTable()';
+     execute immediate m_stmt;
+  end if;
+ if (m_event='DROP' and m_type='TABLE')
+ then
+   m_stmt:='delete from sdo_geor_ddl__table$$ where id=2';
+   EXECUTE IMMEDIATE m_stmt;
+ end if;
+ if (m_type='USER' and m_event='DROP')
+ then
+   m_stmt:='delete from sdo_geor_ddl__table$$';
+   EXECUTE IMMEDIATE m_stmt;
+ end if;
+ Exception
+   when others then
+     if(sqlcode=-13391)
+     then
+       m_stmt:=sqlerrm;
+       m_stmt:=substr(m_stmt,11);
+       m_stmt:='call mderr.raise_md_error(''MD'', ''SDO'', -13391,'''||m_stmt||''')';
+       execute immediate m_stmt;
+     end if;
+end;
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.03       0.03          0          0          0           0
+Execute      1      0.00       0.00          0          0          0           1
+Fetch        0      0.00       0.00          0          0          0           0
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        2      0.03       0.03          0          0          0           1
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 2)
+********************************************************************************
+
+SQL ID : 8kkd784r7x56g
+select ora_login_user  
+from
+ dual
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.00       0.00          0          0          0           0
+Execute      1      0.00       0.00          0          0          0           0
+Fetch        1      0.00       0.00          0          0          0           1
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        3      0.00       0.00          0          0          0           1
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 3)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  FAST DUAL  (cr=0 pr=0 pw=0 time=0 us cost=2 size=0 card=1)
+
+********************************************************************************
+
+SQL ID : 76p07nh763cdv
+call sdo_geor_def.doTruncateTable()
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.00       0.00          0          0          0           0
+Execute      1      0.00       0.00          0          0          0           0
+Fetch        0      0.00       0.00          0          0          0           0
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        2      0.00       0.00          0          0          0           0
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 3)
+********************************************************************************
+
+SQL ID : gt6jkrh79f7ns
+SELECT COUNT(*) 
+FROM
+ SDO_GEOR_SYSDATA_TABLE  WHERE SDO_OWNER = :1 AND GEORASTER_TABLE_NAME = :2
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.00       0.00          0          0          0           0
+Execute      1      0.00       0.00          0          0          0           0
+Fetch        1      0.00       0.00          0          1          0           1
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        3      0.00       0.00          0          1          0           1
+
+Misses in library cache during parse: 1
+Misses in library cache during execute: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 4)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  SORT AGGREGATE (cr=1 pr=0 pw=0 time=0 us)
+      0   TABLE ACCESS BY INDEX ROWID SDO_GEOR_SYSDATA_TABLE (cr=1 pr=0 pw=0 time=0 us cost=0 size=36 card=1)
+      0    INDEX RANGE SCAN UNIQUE_GEORASTERS (cr=1 pr=0 pw=0 time=0 us cost=0 size=0 card=1)(object id 62960)
+
+********************************************************************************
+
+SQL ID : 2abfv4wqwk3s9
+SELECT COUNT(*) 
+FROM
+ MDSYS.SDO_TIN_PC_SYSDATA_TABLE  WHERE SDO_OWNER = :1 AND TABLE_NAME = :2
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.00       0.00          0          0          0           0
+Execute      1      0.00       0.00          0          0          0           0
+Fetch        1      0.00       0.00          0          1          0           1
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        3      0.00       0.00          0          1          0           1
+
+Misses in library cache during parse: 1
+Misses in library cache during execute: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 4)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  SORT AGGREGATE (cr=1 pr=0 pw=0 time=0 us)
+      0   INDEX RANGE SCAN SDO_TIN_PC_IDX (cr=1 pr=0 pw=0 time=0 us cost=0 size=36 card=1)(object id 63401)
+
+********************************************************************************
+
+SQL ID : 2rc2s1cr5crg6
+SELECT COUNT(*) 
+FROM
+ ALL_VIEWS  WHERE OWNER = 'MDSYS' AND VIEW_NAME = 'RDF_MODEL$' 
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.01       0.02          0          0          0           0
+Execute      1      0.00       0.00          0          0          0           0
+Fetch        1      0.00       0.00          0          5          0           1
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        3      0.01       0.02          0          5          0           1
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 52     (recursive depth: 4)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  SORT AGGREGATE (cr=5 pr=0 pw=0 time=0 us)
+      0   FILTER  (cr=5 pr=0 pw=0 time=0 us)
+      0    NESTED LOOPS  (cr=5 pr=0 pw=0 time=0 us cost=3 size=78 card=1)
+      0     NESTED LOOPS  (cr=5 pr=0 pw=0 time=0 us cost=2 size=56 card=1)
+      0      NESTED LOOPS  (cr=5 pr=0 pw=0 time=0 us cost=2 size=51 card=1)
+      1       TABLE ACCESS BY INDEX ROWID USER$ (cr=2 pr=0 pw=0 time=0 us cost=1 size=18 card=1)
+      1        INDEX UNIQUE SCAN I_USER1 (cr=1 pr=0 pw=0 time=0 us cost=0 size=0 card=1)(object id 46)
+      0       INDEX RANGE SCAN I_OBJ5 (cr=3 pr=0 pw=0 time=0 us cost=1 size=33 card=1)(object id 40)
+      0      INDEX UNIQUE SCAN I_VIEW1 (cr=0 pr=0 pw=0 time=0 us cost=0 size=5 card=1)(object id 75)
+      0     INDEX RANGE SCAN I_USER2 (cr=0 pr=0 pw=0 time=0 us cost=1 size=22 card=1)(object id 47)
+      0    NESTED LOOPS  (cr=0 pr=0 pw=0 time=0 us cost=2 size=21 card=1)
+      0     INDEX RANGE SCAN I_OBJAUTH1 (cr=0 pr=0 pw=0 time=0 us cost=2 size=8 card=1)(object id 62)
+      0     FIXED TABLE FULL X$KZSRO (cr=0 pr=0 pw=0 time=0 us cost=0 size=13 card=1)
+      0    FIXED TABLE FULL X$KZSPR (cr=0 pr=0 pw=0 time=0 us cost=0 size=26 card=1)
+      0    NESTED LOOPS  (cr=0 pr=0 pw=0 time=0 us cost=2 size=27 card=1)
+      0     INDEX FULL SCAN I_USER2 (cr=0 pr=0 pw=0 time=0 us cost=1 size=19 card=1)(object id 47)
+      0     INDEX RANGE SCAN I_OBJ4 (cr=0 pr=0 pw=0 time=0 us cost=1 size=8 card=1)(object id 39)
+
+********************************************************************************
+
+SQL ID : 8f173my1ucvvk
+INSERT /*+ APPEND */ into SYS_TEMP_FBT SELECT /*+ FBTSCAN FULL(S) PARALLEL(S, 
+  DEFAULT) */ :1, :2, :3, rowid, SYS_FBT_INSDEL FROM "SCOTT"."EMP" as of SCN 
+  :4 S
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.00       0.00          0          0          0           0
+Execute      1      0.01       0.10          0          2          4          28
+Fetch        0      0.00       0.00          0          0          0           0
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        2      0.01       0.10          0          2          4          28
+
+Misses in library cache during parse: 1
+Misses in library cache during execute: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 81     (recursive depth: 1)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  LOAD AS SELECT  (cr=2 pr=0 pw=0 time=0 us)
+     28   PX COORDINATOR  (cr=2 pr=0 pw=0 time=3 us)
+      0    PX SEND QC (RANDOM) :TQ10000 (cr=0 pr=0 pw=0 time=0 us cost=3 size=4908 card=409)
+      0     PX BLOCK ITERATOR (cr=0 pr=0 pw=0 time=0 us cost=3 size=4908 card=409)
+      0      TABLE ACCESS FULL EMP (cr=0 pr=0 pw=0 time=0 us cost=3 size=4908 card=409)
+
+
+Elapsed times include waiting on following events:
+  Event waited on                             Times   Max. Wait  Total Waited
+  ----------------------------------------   Waited  ----------  ------------
+  control file sequential read                    5        0.00          0.00
+  PX Deq: Parse Reply                             2        0.03          0.03
+  direct path write temp                          1        0.00          0.00
+  PX Deq: Slave Session Stats                     2        0.00          0.00
+********************************************************************************
+
+SQL ID : 01k4fvf5tskru
+DELETE /*+ BYPASS_UJVC */ FROM (SELECT /*+ ORDERED USE_NL(S) PARALLEL(S,
+  DEFAULT) PARALLEL(T,DEFAULT) */ S.rowid FROM SYS_TEMP_FBT T, "SCOTT"."EMP" 
+  S 
+WHERE
+ T.rid = S.rowid and T.action = 'D' and T.object#  = : 1) V
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.00       0.00          0          0          0           0
+Execute      1      0.00       0.01          0          4         45          14
+Fetch        0      0.00       0.00          0          0          0           0
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        2      0.00       0.01          0          4         45          14
+
+Misses in library cache during parse: 1
+Misses in library cache during execute: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 81     (recursive depth: 1)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      0  DELETE  EMP (cr=4 pr=0 pw=0 time=0 us)
+     14   PX COORDINATOR  (cr=4 pr=0 pw=0 time=5 us)
+      0    PX SEND QC (RANDOM) :TQ10000 (cr=0 pr=0 pw=0 time=0 us cost=17 size=12168 card=3)
+      0     NESTED LOOPS  (cr=0 pr=0 pw=0 time=0 us cost=17 size=12168 card=3)
+      0      PX BLOCK ITERATOR (cr=0 pr=0 pw=0 time=0 us)
+      0       TABLE ACCESS FULL SYS_TEMP_FBT (cr=0 pr=0 pw=0 time=0 us cost=16 size=4018 card=1)
+      0      TABLE ACCESS BY USER ROWID EMP (cr=0 pr=0 pw=0 time=0 us cost=1 size=152 card=4)
+
+
+Elapsed times include waiting on following events:
+  Event waited on                             Times   Max. Wait  Total Waited
+  ----------------------------------------   Waited  ----------  ------------
+  enq: RO - fast object reuse                     1        0.00          0.00
+  PX Deq: Slave Session Stats                     2        0.00          0.00
+********************************************************************************
+
+SQL ID : 5mj7wn6buvy8n
+INSERT /*+ PARALLEL(S, DEFAULT) PARALLEL(T, DEFAULT) */ INTO "SCOTT"."EMP" 
+  SELECT /*+ USE_NL(S) ORDERED PARALLEL(S, DEFAULT) PARALLEL(T, DEFAULT) */ 
+  S.* FROM SYS_TEMP_FBT T , "SCOTT"."EMP" as of SCN :1 S WHERE T.rid = 
+  S.rowid and T.action = 'I' and T.object# = :2 
+
+
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.00       0.00          0          0          0           0
+Execute      1      0.00       0.01          0          3         35          14
+Fetch        0      0.00       0.00          0          0          0           0
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        2      0.00       0.01          0          3         35          14
+
+Misses in library cache during parse: 1
+Misses in library cache during execute: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 81     (recursive depth: 1)
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      0  LOAD TABLE CONVENTIONAL  (cr=3 pr=0 pw=0 time=0 us)
+     14   PX COORDINATOR  (cr=2 pr=0 pw=0 time=3 us)
+      0    PX SEND QC (RANDOM) :TQ10000 (cr=0 pr=0 pw=0 time=0 us cost=17 size=12351 card=3)
+      0     NESTED LOOPS  (cr=0 pr=0 pw=0 time=0 us cost=17 size=12351 card=3)
+      0      PX BLOCK ITERATOR (cr=0 pr=0 pw=0 time=0 us)
+      0       TABLE ACCESS FULL SYS_TEMP_FBT (cr=0 pr=0 pw=0 time=0 us cost=16 size=4018 card=1)
+      0      TABLE ACCESS BY USER ROWID EMP (cr=0 pr=0 pw=0 time=0 us cost=1 size=396 card=4)
+
+
+Elapsed times include waiting on following events:
+  Event waited on                             Times   Max. Wait  Total Waited
+  ----------------------------------------   Waited  ----------  ------------
+  enq: RO - fast object reuse                     1        0.00          0.00
+  PX Deq: Slave Session Stats                     2        0.00          0.00
+********************************************************************************
+
+select c.value || '/' || d.instance_name || '_ora_' || a.spid || '.trc' trace
+  from v$process a, v$session b, v$parameter c, v$instance d
+ where a.addr = b.paddr
+   and b.audsid = userenv('sessionid')
+   and c.name = 'user_dump_dest'
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        1      0.04       0.05          0          0          0           0
+Execute      1      0.00       0.00          0          0          0           0
+Fetch        2      0.00       0.00          0          0          0           1
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total        4      0.05       0.06          0          0          0           1
+
+Misses in library cache during parse: 1
+Optimizer mode: ALL_ROWS
+Parsing user id: 81  
+
+Rows     Row Source Operation
+-------  ---------------------------------------------------
+      1  HASH JOIN  (cr=0 pr=0 pw=0 time=0 us cost=1 size=2311 card=1)
+      1   NESTED LOOPS  (cr=0 pr=0 pw=0 time=0 us cost=1 size=2267 card=1)
+     23    NESTED LOOPS  (cr=0 pr=0 pw=0 time=20 us cost=1 size=2198 card=1)
+     23     MERGE JOIN CARTESIAN (cr=0 pr=0 pw=0 time=5 us cost=1 size=2185 card=1)
+      1      MERGE JOIN CARTESIAN (cr=0 pr=0 pw=0 time=0 us cost=1 size=2159 card=1)
+      1       MERGE JOIN CARTESIAN (cr=0 pr=0 pw=0 time=0 us cost=1 size=2136 card=1)
+      1        MERGE JOIN CARTESIAN (cr=0 pr=0 pw=0 time=0 us cost=1 size=2102 card=1)
+      1         HASH JOIN  (cr=0 pr=0 pw=0 time=0 us cost=1 size=2102 card=1)
+      1          FIXED TABLE FULL X$KSPPI (cr=0 pr=0 pw=0 time=0 us cost=0 size=68 card=1)
+   1920          FIXED TABLE FULL X$KSPPCV (cr=0 pr=0 pw=0 time=81 us cost=0 size=203400 card=100)
+      1         BUFFER SORT (cr=0 pr=0 pw=0 time=0 us cost=1 size=0 card=100)
+      1          FIXED TABLE FULL X$QUIESCE (cr=0 pr=0 pw=0 time=0 us cost=0 size=0 card=100)
+      1        BUFFER SORT (cr=0 pr=0 pw=0 time=0 us cost=1 size=34 card=1)
+      1         FIXED TABLE FULL X$KVIT (cr=0 pr=0 pw=0 time=0 us cost=0 size=34 card=1)
+      1       BUFFER SORT (cr=0 pr=0 pw=0 time=0 us cost=1 size=23 card=1)
+      1        FIXED TABLE FULL X$KSUXSINST (cr=0 pr=0 pw=0 time=0 us cost=0 size=23 card=1)
+     23      BUFFER SORT (cr=0 pr=0 pw=0 time=3 us cost=1 size=2600 card=100)
+     23       FIXED TABLE FULL X$KSLWT (cr=0 pr=0 pw=0 time=29 us cost=0 size=2600 card=100)
+     23     FIXED TABLE FIXED INDEX X$KSLED (ind:2) (cr=0 pr=0 pw=0 time=0 us cost=0 size=13 card=1)
+      1    FIXED TABLE FIXED INDEX X$KSUSE (ind:1) (cr=0 pr=0 pw=0 time=0 us cost=0 size=69 card=1)
+     28   FIXED TABLE FULL X$KSUPR (cr=0 pr=0 pw=0 time=3 us cost=0 size=44 card=1)
+
+
+Elapsed times include waiting on following events:
+  Event waited on                             Times   Max. Wait  Total Waited
+  ----------------------------------------   Waited  ----------  ------------
+  SQL*Net message to client                       2        0.00          0.00
+  SQL*Net message from client                     2        0.00          0.00
+
+
+
+********************************************************************************
+
+OVERALL TOTALS FOR ALL NON-RECURSIVE STATEMENTS
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse        5      0.05       0.06          0          0          0           0
+Execute      5      0.00       0.10          4         25          4           3
+Fetch        2      0.00       0.00          0          0          0           1
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total       12      0.06       0.17          4         25          4           4
+
+Misses in library cache during parse: 2
+
+Elapsed times include waiting on following events:
+  Event waited on                             Times   Max. Wait  Total Waited
+  ----------------------------------------   Waited  ----------  ------------
+  SQL*Net message to client                       7        0.00          0.00
+  SQL*Net message from client                     7       20.45         20.47
+  log file sync                                   3        0.02          0.02
+
+
+OVERALL TOTALS FOR ALL RECURSIVE STATEMENTS
+
+call     count       cpu    elapsed       disk      query    current        rows
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+Parse       80      0.19       0.20          0          0          0           0
+Execute    190      0.14       0.27          0         16         95          64
+Fetch      481      0.02       0.09          9        528          3         415
+------- ------  -------- ---------- ---------- ---------- ----------  ----------
+total      751      0.36       0.58          9        544         98         479
+
+Misses in library cache during parse: 52
+Misses in library cache during execute: 35
+
+Elapsed times include waiting on following events:
+  Event waited on                             Times   Max. Wait  Total Waited
+  ----------------------------------------   Waited  ----------  ------------
+  control file sequential read                    5        0.00          0.00
+  PX Deq: Parse Reply                             2        0.03          0.03
+  direct path write temp                          1        0.00          0.00
+  PX Deq: Slave Session Stats                     6        0.00          0.00
+  enq: RO - fast object reuse                     2        0.00          0.00
+  db file sequential read                         9        0.02          0.07
+
+   29  user  SQL statements in session.
+  167  internal SQL statements in session.
+  196  SQL statements in session.
+********************************************************************************
+Trace file: /home/ora11gr1/app/ora11gr1/diag/rdbms/ora11gr1/ora11gr1/trace/ora11gr1_ora_9506.trc
+Trace file compatibility: 11.01.00
+Sort options: default
+
+       1  session in tracefile.
+      29  user  SQL statements in trace file.
+     167  internal SQL statements in trace file.
+     196  SQL statements in trace file.
+      55  unique SQL statements in trace file.
+    3924  lines in trace file.
+      21  elapsed seconds in trace file.
+
+

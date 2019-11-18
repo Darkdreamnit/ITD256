@@ -1,0 +1,16 @@
+1. Shared sql area v$sql to see everything happening
+2.PMON
+3.SMON
+4.DBWn
+5.LGWR
+6.Archive redo log
+7.
+8.
+
+
+
+Data files have to do with tablespaces at bottom
+
+Temporary tablespaces have a temp file associated with it.
+
+Control file #2 is in app/kevin/flash_recovery_area/orcl

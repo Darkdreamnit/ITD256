@@ -1,0 +1,38 @@
+select object_name, original_name, type, droptime
+from recyclebin
+order by droptime desc;
+
+alter index "BIN$GjxUycwNQQi1C3qps6JpXw==$0" rename to
+sys_c0013050;
+
+
+
+create table vac_sched
+(
+emp_no number,
+vac_no number,
+start_date date,
+end_date date,
+primary key(emp_no, vac_no)
+);
+
+insert into vac_sched values(58,2,'21-sep-08','25-sep-08');
+
+insert into vac_sched values(4,09,'10-sep-08','12-sep-04');
+
+
+select table_name, constraint_name
+from user_constraints
+where table_name = 'VAC_SCHED';
+
+
+alter table vac_sched
+rename constraint "BIN$AuIjY6v+QXGA7HF2B9tY6g==$0"
+to vac_sched_pk;
+
+flashback table employees
+to timestamp systimestamp - interval '15' minute;
+
+
+flashback table employees, departments
+to timestamp systimestamp - interval '15' minute;
